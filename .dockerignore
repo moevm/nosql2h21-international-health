@@ -1,3 +1,5 @@
 csv_to_mongo.py
 .git
 .gitignore
+.dockerignore
+mongodb
