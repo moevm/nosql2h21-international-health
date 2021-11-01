@@ -3,3 +3,4 @@
 source
 *.env
 .venv
+.flake8
