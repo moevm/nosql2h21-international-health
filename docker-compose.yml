@@ -12,5 +12,19 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+
+  backend:
+    container_name: backend
+    build:
+      dockerfile: backend/Dockerfile
+      context: .
+    command: python main.py
+    env_file:
+      - .env
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    depends_on:
+      - mongodb
+
 volumes:
   mongodb:
