@@ -5,6 +5,7 @@ from os import listdir
 from pymongo import MongoClient
 
 from backend.helper import get_mongo_client
+from backend.settings import DB_NAME
 
 
 def to_mongo(client: MongoClient, db_name: str, collection_name: str, notes: list[dict]):
@@ -20,10 +21,13 @@ def get_notes(reader: DictReader):
             try:
                 line[key] = int(value)
             except ValueError:
-                pass
+                try:
+                    line[key] = float(value)
+                except ValueError:
+                    pass
 
         result.append(line)
-        if len(result) % 7000 == 0:
+        if len(result) % 30000 == 0:
             yield result
             result.clear()
     yield result
@@ -31,7 +35,6 @@ def get_notes(reader: DictReader):
 
 if __name__ == '__main__':
     client = get_mongo_client()
-    db_name = 'nosql'
     source_dir_path = './source'
 
     for file in listdir(source_dir_path):
@@ -40,5 +43,5 @@ if __name__ == '__main__':
         with open(f'{source_dir_path}/{file}', newline='', encoding='utf-8-sig') as csvfile:
             reader = DictReader(csvfile)
             for batch in get_notes(reader):
-                to_mongo(client, db_name, file, batch)
+                to_mongo(client, DB_NAME, file, batch)
                 print(f'{datetime.utcnow()}: insert {len(batch)} notes of {file} collection')
