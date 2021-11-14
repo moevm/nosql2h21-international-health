@@ -14,28 +14,52 @@ class Repository(object):
 
     async def get_population_information(self, country: Optional[str] = None, ascending: bool = True):
         direction = await get_direction(ascending)
-        pipeline = [
-            {
-                '$group': {
-                    '_id': '$country_name',
-                    'average_population': {'$avg': '$midyear_population'},
-                    'min_population': {'$min': '$midyear_population'},
-                    'max_population': {'$max': '$midyear_population'},
-                },
-            }, {
-                '$project': {
-                    '_id': 0,
-                    'country': '$_id',
-                    'average_population': {'$floor': '$average_population'},
-                    'min_population': 1,
-                    'max_population': 1,
-                },
-            },
-        ]
+        group_section = {
+            '_id': '$country_name',
+            'average_population': {'$avg': '$midyear_population'},
+            'min_population': {'$min': '$midyear_population'},
+            'max_population': {'$max': '$midyear_population'},
+        }
+        project_section = {
+            '_id': 0,
+            'country': '$_id',
+            'average_population': {'$floor': '$average_population'},
+            'min_population': 1,
+            'max_population': 1,
+        }
+
         if country is None:
-            pipeline.append({'$sort': {'country': direction}})
+            sort_section = {'country': direction}
+            match_section = {}
         else:
-            pipeline.insert(0, {'$match': {'country_name': country}})
+            sort_section = {}
+            match_section = {'country_name': country}
+
+        pipeline = [
+            {'$match': match_section},
+            {'$group': group_section},
+            {'$project': project_section},
+            {'$sort': sort_section},
+        ]
 
         query = self.db['midyear_population'].aggregate(pipeline)
+        return list(query)
+
+    async def get_growth_rate(self, mode: str = 'birth', country: Optional[str] = None, year: Optional[int] = None):
+        project_section = {
+            '_id': 0,
+            'country': '$country_name',
+            f'{mode}_rate': f'$crude_{mode}_rate',
+            'year': 1,
+        }
+
+        match_section = {}
+        if country is not None:
+            match_section['country_name'] = country
+        if year is not None:
+            match_section['year'] = year
+
+        pipeline = [{'$match': match_section}, {'$project': project_section}]
+
+        query = self.db['birth_death_growth_rates'].aggregate(pipeline)
         return list(query)
