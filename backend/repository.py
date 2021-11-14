@@ -39,8 +39,10 @@ class Repository(object):
             {'$match': match_section},
             {'$group': group_section},
             {'$project': project_section},
-            {'$sort': sort_section},
         ]
+
+        if sort_section:
+            pipeline.append({'$sort': sort_section})
 
         query = self.db['midyear_population'].aggregate(pipeline)
         return list(query)
