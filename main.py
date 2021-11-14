@@ -21,10 +21,20 @@ async def get_supported_country(sort_by: str = 'country_area', ascending: bool =
 @app.get('/get_population_information')
 async def get_population_information(country: Optional[str] = None, ascending: bool = True):
     available_countries = await get_supported_country()
-    available_countries = [note['country_name'] for note in available_countries]
+    available_countries = (note['country_name'] for note in available_countries)
     if country not in available_countries and country is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Wrong country parameter')
     return await repository.get_population_information(country, ascending)
+
+
+@app.get('/get_growth_rate')
+async def get_growth_rate(mode: str = 'birth', country: Optional[str] = None, year: Optional[int] = None):
+    available_modes = {'birth', 'death'}
+    available_countries = await get_supported_country()
+    available_countries = (note['country_name'] for note in available_countries)
+    if mode not in available_modes or (country not in available_countries and country is not None):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Wrong country or mode parameters')
+    return await repository.get_growth_rate(mode, country, year)
 
 
 if __name__ == '__main__':
