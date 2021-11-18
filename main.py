@@ -1,7 +1,7 @@
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, File, HTTPException, UploadFile, status
 
 from backend.repository import Repository
 from backend.settings import BACKEND_PORT, DB_NAME
@@ -35,6 +35,17 @@ async def get_growth_rate(mode: str = 'birth', country: Optional[str] = None, ye
     if mode not in available_modes or (country not in available_countries and country is not None):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Wrong country or mode parameters')
     return await repository.get_growth_rate(mode, country, year)
+
+
+@app.post('/import_file')
+async def get_supported_countries_file(file: UploadFile = File(...)):
+    client = get_mongo_client()
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Please, upload only csv file')
+    try:
+        return await import_file(file, client, file.filename.replace('.csv', ''))
+    except Exception as e:
+        return {'detail': str(e)}
 
 
 if __name__ == '__main__':
