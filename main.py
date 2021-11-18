@@ -3,6 +3,7 @@ from typing import Optional
 import uvicorn
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
 
+from backend.helper import get_mongo_client, import_file
 from backend.repository import Repository
 from backend.settings import BACKEND_PORT, DB_NAME
 
