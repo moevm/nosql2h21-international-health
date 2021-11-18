@@ -3,3 +3,4 @@ python-dotenv==0.19.1
 uvicorn==0.15.0
 fastapi==0.70.0
 wemake-python-styleguide==0.15.3
+python-multipart==0.0.5
