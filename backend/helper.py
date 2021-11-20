@@ -1,6 +1,6 @@
 from csv import DictReader
 from typing import Union
-
+from fastapi.responses import FileResponse
 import pandas as pd
 from fastapi import HTTPException, status
 from pymongo import ASCENDING, DESCENDING, MongoClient
@@ -57,3 +57,9 @@ async def import_file(file, mongo_client: MongoClient, collection: str):
     for batch in get_batch(to_mongo_data, 30000):
         to_mongo(mongo_client, collection, batch)
     return {'success': True}
+
+
+async def export_file(collection: str, mongo_client: MongoClient):
+    if mongo_client[DB_NAME][collection].count() == 0:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Collection not exists')
+    return FileResponse(f'./source/{collection}.csv')

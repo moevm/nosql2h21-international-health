@@ -3,7 +3,7 @@ from typing import Optional
 import uvicorn
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
 
-from backend.helper import get_mongo_client, import_file
+from backend.helper import get_mongo_client, import_file, export_file
 from backend.repository import Repository
 from backend.settings import BACKEND_PORT, DB_NAME
 
@@ -47,6 +47,12 @@ async def get_import_file(file: UploadFile = File(...)):
         return await import_file(file, client, file.filename.replace('.csv', ''))
     except Exception as e:
         return {'detail': str(e)}
+
+
+@app.get('/export_file')
+async def get_export_file(collection_name: str):
+    client = get_mongo_client()
+    return await export_file(collection_name, client)
 
 
 if __name__ == '__main__':
