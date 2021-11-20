@@ -39,7 +39,7 @@ async def get_growth_rate(mode: str = 'birth', country: Optional[str] = None, ye
 
 
 @app.post('/import_file')
-async def get_supported_countries_file(file: UploadFile = File(...)):
+async def get_import_file(file: UploadFile = File(...)):
     client = get_mongo_client()
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Please, upload only csv file')
