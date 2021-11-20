@@ -44,7 +44,7 @@ def get_batch(reader: Union[DictReader, list[dict]], n: int = 40000):
 
 async def import_file(file, mongo_client: MongoClient, collection: str):
     if mongo_client[DB_NAME][collection].count() != 0:
-        raise HTTPException(status_code=status.HTTP_208_ALREADY_REPORTED, detail='Collection already exists')
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Collection already exists')
     content = await file.read()
     table_view = content.decode('utf-8-sig').split('\r\n')
     if len(table_view) < 2:
