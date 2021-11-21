@@ -62,4 +62,4 @@ async def import_file(file, mongo_client: MongoClient, collection: str):
 async def export_file(collection: str, mongo_client: MongoClient):
     if mongo_client[DB_NAME][collection].count() == 0:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Collection not exists')
-    return FileResponse(f'./source/{collection}.csv')
+    return FileResponse(f'./source/{collection}.csv', filename=f'{collection}.csv')
