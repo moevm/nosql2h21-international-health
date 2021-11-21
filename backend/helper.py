@@ -49,11 +49,8 @@ async def import_file(file, mongo_client: MongoClient, collection: str):
     table_view = pd.read_csv(StringIO(content.decode())).dropna()
     if len(table_view) < 2:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Empty csv file')
-    data = [i.split(',') for i in table_view[1:]]
-    columns = table_view[0].split(',')
-    df = pd.DataFrame(data, columns=columns)
-    df.to_csv(f'./source/{collection}.csv')
-    to_mongo_data = [vls for _, vls in df.iloc[:-1].to_dict('index').items()]
+    table_view.to_csv(f'./source/{collection}.csv', index=False)
+    to_mongo_data = [vls for _, vls in table_view.to_dict('index').items()]
     for batch in get_batch(to_mongo_data, 30000):
         to_mongo(mongo_client, collection, batch)
     return {'success': True}
