@@ -25,6 +25,5 @@ services:
       - ${BACKEND_PORT}:${BACKEND_PORT}
     depends_on:
       - mongodb
-
-volumes:
-  mongodb:
+    volumes:
+      - ./source:/nosql/source
