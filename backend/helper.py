@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 import pandas as pd
 from fastapi import HTTPException, status
 from pymongo import ASCENDING, DESCENDING, MongoClient
-
+from io import StringIO
 from backend.settings import (DB_NAME, MONGODB_HOST, MONGODB_PASSWORD,
                               MONGODB_PORT, MONGODB_USER)
 
@@ -46,7 +46,7 @@ async def import_file(file, mongo_client: MongoClient, collection: str):
     if mongo_client[DB_NAME][collection].count() != 0:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Collection already exists')
     content = await file.read()
-    table_view = content.decode('utf-8-sig').split('\r\n')
+    table_view = pd.read_csv(StringIO(content.decode())).dropna()
     if len(table_view) < 2:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Empty csv file')
     data = [i.split(',') for i in table_view[1:]]
