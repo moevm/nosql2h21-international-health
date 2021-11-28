@@ -2,13 +2,25 @@ from typing import Optional
 
 import uvicorn
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi.middleware.cors import CORSMiddleware
 
-from backend.helper import get_mongo_client, import_file, export_file
+from backend.helper import export_file, get_mongo_client, import_file
 from backend.repository import Repository
 from backend.settings import BACKEND_PORT, DB_NAME
 
 app = FastAPI()
 repository = Repository(DB_NAME)
+
+
+origins = ['*']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 
 @app.get('/get_supported_countries')
